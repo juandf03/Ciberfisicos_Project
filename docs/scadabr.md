@@ -1,5 +1,9 @@
 # ScadaBR clásico 1.2
 
+Los comandos Bash de esta guía y el build se ejecutan en la **VM Debian**, donde
+están Docker y todos los servicios. El WAR debe descargarse en la copia del
+repositorio de Debian. Windows solo necesita SSH y navegador para la HMI.
+
 Se mantiene **ScadaBR clásico**, exigido por el profesor. Su
 [documentación oficial](https://github.com/ScadaBR/ScadaBR/blob/master/README.md)
 indica Java 8, Tomcat 9 y Derby por defecto. No se utiliza Scada-LTS.
@@ -22,7 +26,7 @@ aplicación y configura Derby en `/opt/scadabr-data`, un volumen persistente.
 El build falla si no encuentra la propiedad de conexión esperada.
 
 ```bash
-sudo docker compose --env-file .env -f infrastructure/compose.yaml --profile scada --profile simulation up -d --build
+sudo docker compose --env-file .env -f infrastructure/compose.yaml --profile scada up -d --build
 ```
 
 Acceder desde Windows mediante un túnel SSH:

@@ -5,13 +5,17 @@ flowchart LR
   Sensors[DS18B20 y sonda pH] --> ESP[ESP32]
   ESP -->|MQTT TLS 8883| Broker[Mosquitto]
   Sim[Simulador opcional] -->|MQTT TLS 8883| Broker
+  Wokwi[Nodos Wokwi, ampliación pendiente] -. MQTT TLS con gateway local .-> Broker
   Broker --> Gateway[Controlador Python]
   Gateway -->|Modbus TCP 1502, red interna| SCADA[ScadaBR clásico 1.2]
   SCADA -->|8080 loopback y túnel SSH| User[Navegador]
 ```
 
 Windows → VMware → Debian 13 → Docker Compose. El controlador virtual sustituye
-a una Raspberry Pi. MQTT y Modbus usan redes Docker diferentes; únicamente el
+a una Raspberry Pi. Todos los servicios Docker están en la VM Debian. El ESP32
+físico está fuera de la VM y accede por Wi-Fi; Wokwi se utilizará para añadir
+nodos virtuales después de implementar el soporte multinodo. El editor y Wokwi
+pueden ejecutarse en Windows. MQTT y Modbus usan redes Docker diferentes; únicamente el
 controlador está conectado a ambas. Modbus no publica ningún puerto del host.
 La red HMI permite acceder a ScadaBR por un puerto vinculado a loopback.
 No hay actuadores ni órdenes remotas en esta fase.
@@ -19,6 +23,8 @@ No hay actuadores ni órdenes remotas en esta fase.
 Un dispositivo autorizado por despliegue (`DEVICE_ID`). La identidad MQTT y el
 topic están vinculados mediante ACL. Para añadir nodos hacen falta instancias y
 mapas Modbus independientes o ampliar explícitamente el controlador.
+La estrategia prevista y sus pruebas están en [wokwi.md](wokwi.md); no se da por
+implementada la coexistencia de varios emisores.
 
 ## Contrato MQTT
 
