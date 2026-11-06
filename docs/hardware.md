@@ -1,5 +1,11 @@
 # Montaje y firmware
 
+El equipo dispone de un ESP32 físico. El servidor MQTT/SCADA se ejecuta en
+contenedores dentro de la VM Debian; la placa se conecta a su IP LAN por Wi-Fi.
+Se puede compilar y grabar por USB desde Windows con PlatformIO, sin pasar el USB
+a VMware. Wokwi se usará para futuros nodos adicionales, no reemplaza esta placa:
+ver [plan de simulación](wokwi.md).
+
 Objetivo: ESP32 DevKit clásico (`esp32dev`), DS18B20 impermeable y módulo pH
 acondicionado. Confirmar el modelo exacto de placa y sonda antes del montaje.
 
