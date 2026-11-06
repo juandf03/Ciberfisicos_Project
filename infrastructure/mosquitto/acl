@@ -1,0 +1,5 @@
+user controller
+topic read farm/+/telemetry
+
+# Only the device account can publish its own topic. No command topics.
+pattern write farm/%u/telemetry

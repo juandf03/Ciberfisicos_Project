@@ -1,0 +1,88 @@
+name: ciberfisicos
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.22
+    user: "1883:1883"
+    command: ["mosquitto", "-c", "/mosquitto/config/mosquitto.conf"]
+    ports:
+      - "${MQTT_BIND_IP:-127.0.0.1}:${MQTT_PORT:-8883}:8883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/acl:/mosquitto/config/acl:ro
+      - ./mosquitto/passwords:/mosquitto/config/passwords:ro
+      - ./certs:/mosquitto/certs:ro
+    networks: [mqtt]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+  controller:
+    build:
+      context: ..
+      dockerfile: controller/Dockerfile
+    environment:
+      DEVICE_ID: ${DEVICE_ID:-esp32-01}
+      MQTT_HOST: mosquitto
+      MQTT_CA_FILE: /run/secrets/ca.crt
+      MQTT_PASSWORD_FILE: /run/secrets/controller.password
+      STATE_DB: /data/state.sqlite
+    volumes:
+      - controller-data:/data
+      - ./certs/ca.crt:/run/secrets/ca.crt:ro
+      - ./certs/controller.password:/run/secrets/controller.password:ro
+    networks: [mqtt, industrial]
+    depends_on: [mosquitto]
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+  simulator:
+    profiles: [simulation]
+    build:
+      context: ..
+      dockerfile: controller/Dockerfile
+    command: ["python", "simulator/simulate_esp32.py"]
+    environment:
+      DEVICE_ID: ${DEVICE_ID:-esp32-01}
+      MQTT_HOST: mosquitto
+      MQTT_CA_FILE: /run/secrets/ca.crt
+      MQTT_PASSWORD_FILE: /run/secrets/device.password
+      SEQUENCE_FILE: /data/sequence
+    volumes:
+      - simulator-data:/data
+      - ./certs/ca.crt:/run/secrets/ca.crt:ro
+      - ./certs/device.password:/run/secrets/device.password:ro
+    networks: [mqtt]
+    depends_on: [mosquitto]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+  scadabr:
+    profiles: [scada]
+    build: ./scadabr
+    ports:
+      - "${SCADA_BIND_IP:-127.0.0.1}:${SCADA_PORT:-8080}:8080"
+    volumes:
+      - scada-data:/opt/scadabr-data
+    networks: [industrial, hmi]
+    depends_on: [controller]
+    read_only: true
+    tmpfs:
+      - /tmp:uid=10001,gid=10001
+      - /usr/local/tomcat/temp:uid=10001,gid=10001
+      - /usr/local/tomcat/work:uid=10001,gid=10001
+      - /usr/local/tomcat/logs:uid=10001,gid=10001
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    restart: unless-stopped
+networks:
+  mqtt: {}
+  industrial:
+    internal: true
+  hmi: {}
+volumes:
+  controller-data: {}
+  simulator-data: {}
+  scada-data: {}

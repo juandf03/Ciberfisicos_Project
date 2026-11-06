@@ -1,0 +1,38 @@
+name: Verify laboratory
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  controller:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest -q
+      - run: docker compose --env-file .env.example -f infrastructure/compose.yaml --profile simulation --profile scada config --quiet
+      - run: bash -n scripts/init-lab.sh scripts/verify-pipeline.sh
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: cp .env.example .env
+      - run: sudo bash scripts/init-lab.sh 127.0.0.1
+      - run: bash scripts/verify-pipeline.sh
+      - if: failure()
+        run: docker compose --env-file .env -f infrastructure/compose.yaml --profile simulation logs
+      - if: always()
+        run: docker compose --env-file .env -f infrastructure/compose.yaml --profile simulation down
+  firmware:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install platformio==6.1.18
+      - run: cp firmware/esp32/include/secrets.example.h firmware/esp32/include/secrets.h
+      - run: pio run -d firmware/esp32

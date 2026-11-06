@@ -1,0 +1,10 @@
+.git
+.env
+.venv
+.venv*
+.cache
+**/__pycache__
+**/.pio
+infrastructure/certs
+infrastructure/mosquitto/passwords
+firmware/esp32/include/secrets.h
