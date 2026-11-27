@@ -28,7 +28,7 @@ WAR oficial ScadaBR 1.2 descargado localmente, excluido de Git:
   con ruta de base de datos. La imagen usa ruta absoluta en volumen persistente.
 
 Este registro describe comprobaciones realizadas, no acredita seguridad de
-producción ni sustituye las pruebas de integración sobre Debian.
+producción ni sustituye las pruebas de integración sobre Kali.
 
 La compilación Xtensa en Windows necesitó una unidad temporal sin espacios
 apuntando al repositorio, porque la ruta local de herramientas contenía espacios.
@@ -37,4 +37,4 @@ La unidad se eliminó al terminar. Se observaron advertencias de directivas
 credenciales ficticias y no se ha grabado en hardware.
 
 El workflow incluye una prueba Docker del flujo TLS y el watchdog. Su ejecución
-queda pendiente de GitHub Actions o de la VM Debian; no se ha ejecutado localmente.
+queda pendiente de GitHub Actions o de la VM Kali; no se ha ejecutado localmente.

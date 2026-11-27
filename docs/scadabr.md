@@ -1,8 +1,8 @@
 # ScadaBR clásico 1.2
 
-Los comandos Bash de esta guía y el build se ejecutan en la **VM Debian**, donde
+Los comandos Bash de esta guía y el build se ejecutan en la **VM Kali**, donde
 están Docker y todos los servicios. El WAR debe descargarse en la copia del
-repositorio de Debian. Windows solo necesita SSH y navegador para la HMI.
+repositorio de Kali. Windows solo necesita SSH y navegador para la HMI.
 
 Se mantiene **ScadaBR clásico**, exigido por el profesor. Su
 [documentación oficial](https://github.com/ScadaBR/ScadaBR/blob/master/README.md)
@@ -32,7 +32,7 @@ sudo docker compose --env-file .env -f infrastructure/compose.yaml --profile sca
 Acceder desde Windows mediante un túnel SSH:
 
 ```powershell
-ssh -L 8080:127.0.0.1:8080 usuario@IP_DEBIAN
+ssh -L 8080:127.0.0.1:8080 usuario@IP_VM
 ```
 
 Abrir `http://localhost:8080/ScadaBR/`. Cambiar inmediatamente las credenciales
@@ -64,6 +64,6 @@ no se incluyen exportaciones ficticias ni se dan por configurados.
 ## Estado de validación
 
 El arranque de esta imagen, la persistencia Derby y la conexión desde la HMI
-necesitan comprobarse en Debian con Docker. Las pruebas Python verifican el
+necesitan comprobarse en Kali con Docker. Las pruebas Python verifican el
 servidor Modbus, pero no sustituyen esa comprobación. Los tags de imágenes deben
 actualizarse y fijarse a digest tras validar la instalación de entrega.

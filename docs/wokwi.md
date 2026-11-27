@@ -4,7 +4,7 @@
 
 Disponemos de un ESP32 físico. Wokwi representará dispositivos adicionales para
 estudiar varios tanques. Broker, controlador, ScadaBR y Docker permanecerán en
-la VM Debian. Esta guía es un **plan**: todavía no hay `diagram.json`,
+la VM Kali. Esta guía es un **plan**: todavía no hay `diagram.json`,
 `wokwi.toml`, firmware específico de simulación ni controlador multinodo.
 No se han ejecutado simulaciones Wokwi. El simulador Python solo genera mensajes;
 no ejecuta el firmware.
@@ -18,7 +18,7 @@ vacía para los nodos virtuales, conservando la Wi-Fi real en la placa física.
 Referencias: [red ESP32](https://docs.wokwi.com/guides/esp32-wifi) y
 [gateway VS Code](https://docs.wokwi.com/vscode/project-config#iot-gateway-esp32-wifi).
 
-El broker será `IP_DEBIAN:8883`, con esa IP en SAN y verificación de CA activa.
+El broker será `IP_VM:8883`, con esa IP en SAN y verificación de CA activa.
 No publicar el broker en Internet para resolver la conectividad. Cada nodo
 necesita identidad y credencial de ensayo propias. No publicar contraseñas ni
 binarios con credenciales reutilizables en proyectos compartidos.

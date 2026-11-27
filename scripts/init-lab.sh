@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 if [[ $# -ne 1 || ! $1 =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo 'Uso: sudo bash scripts/init-lab.sh IP_DEBIAN' >&2
+  echo 'Uso: sudo bash scripts/init-lab.sh IP_VM' >&2
   exit 1
 fi
 if [[ $EUID -ne 0 ]]; then echo 'Ejecutar con sudo (permisos UID contenedores).' >&2; exit 1; fi

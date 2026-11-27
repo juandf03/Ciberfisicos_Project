@@ -10,7 +10,7 @@
 | Calidad | INVALID y STALE, sin reemplazar último válido | pytest y detener el emisor >30 s |
 | Aislamiento industrial | Puerto 1502 sin publicación Docker | `docker compose config`, revisar puertos desde host |
 | Solo lectura | FC04; rechazo de otras funciones | Prueba Modbus por TCP real |
-| Mínimo privilegio | Usuarios sin root, capacidades eliminadas, FS de solo lectura | Inspeccionar contenedores en Debian |
+| Mínimo privilegio | Usuarios sin root, capacidades eliminadas, FS de solo lectura | Inspeccionar contenedores en Kali |
 | Acceso HMI | Loopback y túnel SSH | Configurar roles y probar con usuarios reales |
 | CI | Python, Compose y compilación firmware | Revisar ejecución en GitHub Actions |
 
