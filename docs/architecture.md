@@ -11,8 +11,8 @@ flowchart LR
   SCADA -->|8080 loopback y túnel SSH| User[Navegador]
 ```
 
-Windows → VMware → Debian 13 → Docker Compose. El controlador virtual sustituye
-a una Raspberry Pi. Todos los servicios Docker están en la VM Debian. El ESP32
+Windows → VirtualBox → Kali Linux 2026.3 → Docker Compose. El controlador virtual sustituye
+a una Raspberry Pi. Todos los servicios Docker están en la VM Kali. El ESP32
 físico está fuera de la VM y accede por Wi-Fi; Wokwi se utilizará para añadir
 nodos virtuales después de implementar el soporte multinodo. El editor y Wokwi
 pueden ejecutarse en Windows. MQTT y Modbus usan redes Docker diferentes; únicamente el
@@ -43,7 +43,7 @@ calidad inválida si falla una lectura; no se reemplaza con ceros inventados.
 
 La secuencia y el último dato válido sobreviven a reinicios del controlador en
 SQLite. Tras reiniciar se exige una lectura nueva para recuperar la calidad.
-El reloj de Debian debe estar sincronizado. El watchdog también usa reloj
+El reloj de Kali debe estar sincronizado. El watchdog también usa reloj
 monótono para detectar pérdida de comunicación aunque cambie la hora del sistema.
 
 ## Registros Modbus

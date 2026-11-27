@@ -1,6 +1,6 @@
 # Material local (no versionar)
 
-Ejecutar `bash scripts/init-lab.sh IP_DEBIAN` en Debian desde la raíz.
+Ejecutar `bash scripts/init-lab.sh IP_VM` en Kali desde la raíz.
 Genera una CA de laboratorio, certificado servidor con SAN IP/DNS,
 contraseñas aleatorias por identidad y fichero Mosquitto con hashes.
 Los clientes verifican la CA y el nombre del broker. No se usa `setInsecure`.

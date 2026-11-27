@@ -5,10 +5,11 @@ las lecturas mediante MQTT con TLS y supervisarlas en **ScadaBR clásico 1.2**.
 Disponemos de **un ESP32 físico**. Se utilizará **Wokwi para estudiar la ampliación
 con nodos virtuales**, conservando el dispositivo real como parte del montaje.
 
-**Docker y todos los servicios del sistema se instalan y ejecutan dentro de una
-máquina virtual Debian 13 en VMware.** Windows es el anfitrión: permite editar
+**El laboratorio se ha montado en una
+máquina virtual Kali Linux 2026.3 en VirtualBox**, donde se ejecutan Docker y
+los servicios del sistema. Desde Windows, el anfitrión, se puede editar
 código, grabar el ESP32 por USB, ejecutar Wokwi y abrir el navegador. El ESP32
-se conecta por Wi-Fi al broker de Debian.
+se conecta por Wi-Fi al broker de Kali.
 
 El repositorio contiene la base de software y el procedimiento de instalación.
 El despliegue completo en la VM, los sensores y Wokwi requieren validación.
@@ -22,7 +23,7 @@ flowchart LR
   Sensors[Temperatura y pH reales] --> Real[ESP32 físico]
   Real -->|Wi-Fi y MQTT TLS 8883| Broker
   Wokwi[Nodos Wokwi: ampliación pendiente] -. MQTT TLS por gateway local .-> Broker
-  subgraph VM[VMware: máquina virtual Debian 13]
+  subgraph VM[VirtualBox: máquina virtual Kali Linux 2026.3]
     subgraph Docker[Servicios Docker]
       Broker[Mosquitto] -->|Suscripción MQTT| Controller[Controlador Python]
       Controller -->|Modbus TCP 1502 interno| Scada[ScadaBR clásico]
@@ -78,43 +79,43 @@ en ScadaBR. Secure Boot y cifrado de flash no están habilitados.
 
 | Entorno | Qué se ejecuta allí |
 |---|---|
-| Windows anfitrión | VMware, VS Code, PlatformIO para grabar por USB, Wokwi y navegador |
-| VM Debian 13 | Docker Engine, Compose, Git, OpenSSH, OpenSSL y copia del repositorio |
-| Docker dentro de Debian | Mosquitto, controlador Python, ScadaBR y simulador Python si se necesita |
+| Windows anfitrión | VirtualBox, VS Code, PlatformIO para grabar por USB, Wokwi y navegador |
+| VM Kali Linux 2026.3 | Docker Engine, Compose, Git, OpenSSH, OpenSSL y copia del repositorio |
+| Docker dentro de Kali | Mosquitto, controlador Python, ScadaBR y simulador Python si se necesita |
 | ESP32 físico | Firmware compilado, sensores y Wi-Fi hacia la VM |
 | Wokwi | Firmware y sensores virtuales; futura incorporación de nodos simulados |
 
 No se necesita Docker Desktop en Windows ni una Raspberry Pi. Con VS Code
-Remote SSH se edita la copia de Debian. El flasheo desde Windows utiliza una
+Remote SSH se edita la copia de Kali. El flasheo desde Windows utiliza una
 copia local del firmware y el USB de la placa; no exige pasar el USB a la VM.
 Sincronizar las copias mediante Git.
 
-VM recomendada: 2–4 vCPU, 4–6 GB RAM y 40 GB de disco. Usar red **Bridged/puente**
-y reservar una IP para Debian. Ejemplo de esta guía: `192.168.1.50`; sustituirla
+VM recomendada: 2–4 vCPU, 4–6 GB de RAM y 40 GB de disco. En VirtualBox, usar **Adaptador puente**
+y reservar una IP para Kali. Ejemplo de esta guía: `192.168.1.50`; sustituirla
 por la IP real. ESP32 y VM deben poder comunicarse en la LAN.
 
 | Puerto | Acceso previsto |
 |---|---|
-| Debian TCP 22 | SSH desde el equipo de desarrollo |
-| Debian TCP 8883 | MQTT TLS desde el ESP32 y futuros nodos virtuales autorizados |
-| Debian loopback TCP 8080 | ScadaBR, desde Windows por túnel SSH |
+| Kali TCP 22 | SSH desde el equipo de desarrollo |
+| Kali TCP 8883 | MQTT TLS desde el ESP32 y futuros nodos virtuales autorizados |
+| Kali loopback TCP 8080 | ScadaBR, desde Windows por túnel SSH |
 | Docker TCP 1502 | Modbus controlador–ScadaBR; sin publicación en el host |
 
-`localhost` en el ESP32 no es Debian. Tampoco sirve `mosquitto` como hostname
+`localhost` en el ESP32 no es Kali. Tampoco sirve `mosquitto` como hostname
 de la placa: ese nombre pertenece a Docker. La placa usa la IP LAN de la VM.
 
-## 4. Instalar y arrancar los servicios en Debian
+## 4. Instalar y arrancar los servicios en Kali
 
 ### 4.1. Preparar la VM
 
-Instalar Debian 13 y Docker siguiendo [docs/setup.md](docs/setup.md).
-**Todos los comandos Bash de esta sección se ejecutan en Debian**, en consola
+Instalar Kali Linux 2026.3 y Docker siguiendo [docs/setup.md](docs/setup.md).
+**Todos los comandos Bash de esta sección se ejecutan en Kali**, en consola
 o por SSH. Los comandos PowerShell se ejecutan en Windows.
 
 ```bash
 sudo docker run --rm hello-world
 sudo docker compose version
-hostname -I
+ip -br -4 addr
 timedatectl status
 git clone https://github.com/juandf03/Ciberfisicos_Project.git
 cd Ciberfisicos_Project
@@ -154,7 +155,7 @@ ausencia son esperables. Salir de los logs con Ctrl+C no detiene los servicios.
 
 ### 4.3. Añadir ScadaBR clásico
 
-Desde la misma carpeta de Debian:
+Desde la misma carpeta de Kali:
 
 ```bash
 curl --fail --location --proto '=https' --tlsv1.2 \
@@ -191,12 +192,12 @@ En la copia local de Windows, crear `firmware/esp32/include/secrets.h` a partir
 de `secrets.example.h`. Configurar:
 
 - `WIFI_SSID` y `WIFI_PASSWORD`: Wi-Fi real del laboratorio.
-- `MQTT_HOST`: IP LAN de Debian, aquí `192.168.1.50`.
+- `MQTT_HOST`: IP LAN de Kali, aquí `192.168.1.50`.
 - `DEVICE_ID`: `esp32-01`, igual que `.env`.
-- `MQTT_PASSWORD`: contraseña generada para el dispositivo en Debian.
+- `MQTT_PASSWORD`: contraseña generada para el dispositivo en Kali.
 - `MQTT_CA`: contenido de la CA **pública**, `infrastructure/certs/ca.crt`.
 
-La contraseña se consulta localmente en Debian con
+La contraseña se consulta localmente en Kali con
 `sudo cat infrastructure/certs/device.password` y se transfiere por un canal
 privado. No copiar `ca.key` ni `server.key` a la placa ni a Git.
 
@@ -221,7 +222,7 @@ Más detalles: [docs/hardware.md](docs/hardware.md).
 
 ## 6. Comprobar lecturas y alarmas
 
-En **Debian**, desde la raíz del repositorio:
+En **Kali**, desde la raíz del repositorio:
 
 ```bash
 sudo docker compose --env-file .env -f infrastructure/compose.yaml exec controller python -c \
@@ -254,7 +255,7 @@ distinto de Wokwi y permite probar el servidor y automatizar comprobaciones.
 
 En un **despliegue de pruebas separado**, configurar una identidad de ensayo,
 por ejemplo `esp32-python-01`, antes de generar sus secretos. Si convive con el
-despliegue físico, utilizar otra copia del repositorio en Debian y este `.env`
+despliegue físico, utilizar otra copia del repositorio en Kali y este `.env`
 (ajustando la IP antes de generar certificados):
 
 ```dotenv
@@ -294,7 +295,7 @@ en un comando con `-p`. Referencia:
 Objetivo: conservar `esp32-01` como nodo real y añadir identidades como
 `esp32-wokwi-01`, `esp32-wokwi-02`, etc. Cada una representaría otro tanque,
 con credencial, secuencia, calidad y alarmas independientes, enviando datos
-al broker de la **misma VM Debian**.
+al broker de la **misma VM Kali**.
 
 **La integración Wokwi y el soporte multinodo todavía no están implementados.**
 El controlador solo se suscribe al `DEVICE_ID` configurado y ofrece seis
@@ -314,7 +315,7 @@ mediciones de latencia, carga y pérdida de datos.
 | Controlador Python | 22 pruebas superadas, incluido Modbus TCP real en loopback |
 | Firmware `esp32dev` | Compilado con credenciales ficticias; sin grabación en placa |
 | Sintaxis Bash y YAML | Comprobadas |
-| Docker/ScadaBR en vuestra VM Debian | Pendiente |
+| Validación de Docker y ScadaBR en la VM Kali | Pendiente |
 | Sensores físicos y calibración | Pendiente |
 | Wokwi y varios nodos simultáneos | Pendiente de implementación y ejecución |
 
@@ -330,7 +331,7 @@ no es necesario crear una rama por cada dispositivo simulado.
 Antes de la PR:
 
 - Revisar arquitectura, VM, contrato MQTT y mapa Modbus.
-- Arrancar Debian y configurar realmente los puntos de ScadaBR.
+- Configurar y comprobar los puntos de ScadaBR en la VM Kali.
 - Comprobar lectura válida, pérdida de emisor y rechazo de datos inválidos.
 - Confirmar sensores, calibración y puerto USB del ESP32.
 - Acordar número de nodos Wokwi y ampliación multinodo.
@@ -342,7 +343,7 @@ Controles: [security/security-controls.md](security/security-controls.md).
 
 ## 10. Operación y problemas habituales
 
-Desde la raíz del repositorio en Debian:
+Desde la raíz del repositorio en Kali:
 
 ```bash
 sudo docker compose --env-file .env -f infrastructure/compose.yaml ps
@@ -356,11 +357,11 @@ sobre la instalación de trabajo: elimina secuencias e histórico.
 
 | Síntoma | Qué comprobar |
 |---|---|
-| ESP32 no alcanza el broker | IP de Debian, modo puente, aislamiento Wi-Fi y puerto 8883 |
+| ESP32 no alcanza el broker | IP de Kali, modo puente, aislamiento Wi-Fi y puerto 8883 |
 | Fallo TLS | CA correcta, IP en SAN, vigencia del certificado y reloj |
 | Conecta pero no publica | `PH_CALIBRATED`, calibración, DS18B20 y monitor serie |
 | `replay_or_out_of_order` | Secuencia reutilizada, identidad compartida o NVS reiniciada |
-| ScadaBR no abre | Perfil `scada`, WAR en Debian, logs y túnel SSH |
+| ScadaBR no abre | Perfil `scada`, WAR en Kali, logs y túnel SSH |
 | Ceros/valores antiguos | Calidad, alarmas, FC04, unidad, offsets y factor 0,01 |
 | Wokwi no llega a la VM | Gateway con ruta local y broker accesible; ver guía Wokwi |
 

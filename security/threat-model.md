@@ -2,7 +2,7 @@
 
 Activos: integridad/frescura de medidas, credenciales, disponibilidad, histórico,
 configuración HMI y código. Límites de confianza: dispositivo → Wi-Fi → broker,
-broker → controlador, controlador → SCADA, administrador → Debian/GitHub.
+broker → controlador, controlador → SCADA, administrador → Kali/GitHub.
 
 | Amenaza | Mitigación implementada | Riesgo residual |
 |---|---|---|
